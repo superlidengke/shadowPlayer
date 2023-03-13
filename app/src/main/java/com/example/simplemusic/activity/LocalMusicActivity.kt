@@ -225,7 +225,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
                 for (f in dir.listFiles()) {
                     if (f.isFile) path = f.absolutePath
                     if (f.name.contains(".mp3")) {
-                        list.add(LocalMusic(path, f.name, "art", "null", false))
+                        list.add(LocalMusic(path, f.name, "art", "null"))
                         Log.i("audio path", path)
                     }
                 }
@@ -234,7 +234,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
         localMusicList?.clear()
         for (s in list) {
             val m =
-                Music(s.songUrl, s.title, s.artist, s.imgUrl, s.isOnlineMusic)
+                Music(s.songUrl, s.title, s.artist, s.imgUrl)
             localMusicList!!.add(m)
         }
 
@@ -305,41 +305,29 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
                     btnPlayOrPause!!.setImageResource(R.drawable.zanting)
                     playingTitleView!!.text = item!!.title
                     playingArtistView!!.text = item.artist
-                    if (item.isOnlineMusic) {
-                        Glide.with(applicationContext)
-                            .load(item.imgUrl)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(playingImgView!!)
-                    } else {
-                        val resolver = contentResolver
-                        val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                        Glide.with(applicationContext)
-                            .load(img)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(playingImgView!!)
-                    }
+
+                    val resolver = contentResolver
+                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                    Glide.with(applicationContext)
+                        .load(img)
+                        .placeholder(R.drawable.defult_music_img)
+                        .error(R.drawable.defult_music_img)
+                        .into(playingImgView!!)
+
                 } else if (item != null) {
                     // 当前有可播放音乐但没有播放
                     btnPlayOrPause!!.setImageResource(R.drawable.bofang)
                     playingTitleView!!.text = item.title
                     playingArtistView!!.text = item.artist
-                    if (item.isOnlineMusic) {
-                        Glide.with(applicationContext)
-                            .load(item.imgUrl)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(playingImgView!!)
-                    } else {
-                        val resolver = contentResolver
-                        val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                        Glide.with(applicationContext)
-                            .load(img)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(playingImgView!!)
-                    }
+
+                    val resolver = contentResolver
+                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                    Glide.with(applicationContext)
+                        .load(img)
+                        .placeholder(R.drawable.defult_music_img)
+                        .error(R.drawable.defult_music_img)
+                        .into(playingImgView!!)
+
                 }
             }
 

@@ -233,41 +233,29 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                     musicArtistView!!.text = item.artist
                     btnPlayOrPause!!.setImageResource(R.drawable.ic_pause)
                     rotateAnimator!!.playAnimator()
-                    if (item.isOnlineMusic) {
-                        Glide.with(applicationContext)
-                            .load(item.imgUrl)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(musicImgView!!)
-                    } else {
-                        val resolver = contentResolver
-                        val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                        Glide.with(applicationContext)
-                            .load(img)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(musicImgView!!)
-                    }
+
+                    val resolver = contentResolver
+                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                    Glide.with(applicationContext)
+                        .load(img)
+                        .placeholder(R.drawable.defult_music_img)
+                        .error(R.drawable.defult_music_img)
+                        .into(musicImgView!!)
+
                 } else {
                     //当前有可播放音乐但没有播放
                     musicTitleView!!.text = item.title
                     musicArtistView!!.text = item.artist
                     btnPlayOrPause!!.setImageResource(R.drawable.ic_play)
-                    if (item.isOnlineMusic) {
-                        Glide.with(applicationContext)
-                            .load(item.imgUrl)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(musicImgView!!)
-                    } else {
-                        val resolver = contentResolver
-                        val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                        Glide.with(applicationContext)
-                            .load(img)
-                            .placeholder(R.drawable.defult_music_img)
-                            .error(R.drawable.defult_music_img)
-                            .into(musicImgView!!)
-                    }
+
+                    val resolver = contentResolver
+                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                    Glide.with(applicationContext)
+                        .load(img)
+                        .placeholder(R.drawable.defult_music_img)
+                        .error(R.drawable.defult_music_img)
+                        .into(musicImgView!!)
+
                 }
 
                 // 获取当前播放模式
@@ -303,21 +291,15 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                 musicArtistView!!.text = item.artist
                 btnPlayOrPause!!.setImageResource(R.drawable.ic_pause)
                 rotateAnimator!!.playAnimator()
-                if (item.isOnlineMusic) {
-                    Glide.with(applicationContext)
-                        .load(item.imgUrl)
-                        .placeholder(R.drawable.defult_music_img)
-                        .error(R.drawable.defult_music_img)
-                        .into(musicImgView!!)
-                } else {
-                    val resolver = contentResolver
-                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                    Glide.with(applicationContext)
-                        .load(img)
-                        .placeholder(R.drawable.defult_music_img)
-                        .error(R.drawable.defult_music_img)
-                        .into(musicImgView!!)
-                }
+
+                val resolver = contentResolver
+                val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                Glide.with(applicationContext)
+                    .load(img)
+                    .placeholder(R.drawable.defult_music_img)
+                    .error(R.drawable.defult_music_img)
+                    .into(musicImgView!!)
+
             }
 
             override fun onPause() {

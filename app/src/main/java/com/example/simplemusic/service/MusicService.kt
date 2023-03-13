@@ -144,8 +144,7 @@ class MusicService : Service() {
                 music.songUrl,
                 music.title,
                 music.artist,
-                music.imgUrl,
-                music.isOnlineMusic
+                music.imgUrl
             )
             playingMusic.save()
         }
@@ -163,8 +162,7 @@ class MusicService : Service() {
                 i.songUrl,
                 i.title,
                 i.artist,
-                i.imgUrl,
-                i.isOnlineMusic
+                i.imgUrl
             )
             playingMusic.save()
         }
@@ -294,7 +292,7 @@ class MusicService : Service() {
         )
         for (i in list) {
             val m =
-                Music(i.songUrl, i.title, i.artist, i.imgUrl, i.isOnlineMusic)
+                Music(i.songUrl, i.title, i.artist, i.imgUrl)
             playingMusicList?.add(m)
         }
         if (!playingMusicList.isNullOrEmpty()) {
