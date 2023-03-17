@@ -57,8 +57,8 @@ class MusicService : Service() {
             player!!.stop()
         }
         player!!.release()
-        playingMusicList!!.clear()
-        listenrList!!.clear()
+        playingMusicList?.clear()
+        listenrList?.clear()
         handler.removeMessages(66)
         audioManager!!.abandonAudioFocus(audioFocusListener) //注销音频管理服务
     }
@@ -246,8 +246,8 @@ class MusicService : Service() {
         player!!.seekTo(pos)
     }
 
-    private val isPlayingInner: Boolean
-        private get() = player!!.isPlaying
+    val isPlayingInner: Boolean
+        get() = player!!.isPlaying
     val playingListInner: List<Music?>?
         get() = playingMusicList
 

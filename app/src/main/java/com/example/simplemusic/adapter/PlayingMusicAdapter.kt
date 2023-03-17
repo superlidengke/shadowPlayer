@@ -15,12 +15,11 @@ class PlayingMusicAdapter(
     resId: Int,
     private val mData: List<Music?>?
 ) : BaseAdapter() {
-    private val mInflater: LayoutInflater
+    private val mInflater: LayoutInflater = LayoutInflater.from(mContext)
     private val mResource: Int
     private var monDeleteButtonListener: OnDeleteButtonListener? = null
 
     init {
-        mInflater = LayoutInflater.from(mContext)
         mResource = resId
     }
 

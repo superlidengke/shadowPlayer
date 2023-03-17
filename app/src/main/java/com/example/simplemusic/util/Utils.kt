@@ -27,18 +27,18 @@ object Utils {
 
     // 获取本地音乐封面图片
     fun getLocalMusicBmp(res: ContentResolver, musicPic: String?): Bitmap? {
-        val `in`: InputStream?
-        var bmp: Bitmap? = null
-        try {
+        var inputStream: InputStream? = null
+        return try {
             val uri = Uri.parse(musicPic)
-            `in` = res.openInputStream(uri)
+            inputStream = res.openInputStream(uri)
             val sBitmapOptions = BitmapFactory.Options()
-            bmp = BitmapFactory.decodeStream(`in`, null, sBitmapOptions)
-            `in`!!.close()
+            BitmapFactory.decodeStream(inputStream, null, sBitmapOptions)
         } catch (e: Exception) {
             e.printStackTrace()
+            null
+        } finally {
+            inputStream?.close()
         }
-        return bmp
     }
 
     //格式化歌曲时间

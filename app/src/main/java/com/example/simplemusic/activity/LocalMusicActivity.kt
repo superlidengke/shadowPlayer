@@ -59,7 +59,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
 
         // 列表项点击事件
         musicListView!!.onItemClickListener =
-            OnItemClickListener { parent, view, position, id ->
+            OnItemClickListener { _, _, position, _ ->
                 val music = localMusicList!![position]
                 serviceBinder!!.addPlayList(music)
             }
@@ -72,7 +72,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
                 val items = arrayOf("收藏到我的音乐", "添加到播放列表", "删除")
                 val builder = AlertDialog.Builder(this@LocalMusicActivity)
                 builder.setTitle(music.title + "-" + music.artist)
-                builder.setItems(items) { dialog, which ->
+                builder.setItems(items) { _, which ->
                     when (which) {
                         1 -> serviceBinder!!.addPlayList(music)
                         2 -> {
@@ -164,27 +164,27 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        localMusicList!!.clear()
+        localMusicList?.clear()
         unbindService(mServiceConnection)
     }
 
     private fun initActivity() {
         //初始化控件
-        val btn_playAll = findViewById<ImageView>(R.id.play_all)
+        val playAllBtn = findViewById<ImageView>(R.id.play_all)
         musicCountView = findViewById(R.id.play_all_title)
-        val btn_refresh = findViewById<ImageView>(R.id.refresh)
+        val refreshBtn = findViewById<ImageView>(R.id.refresh)
         musicListView = findViewById(R.id.music_list)
         val playerToolView = findViewById<RelativeLayout>(R.id.player)
         playingImgView = findViewById(R.id.playing_img)
         playingTitleView = findViewById(R.id.playing_title)
         playingArtistView = findViewById(R.id.playing_artist)
         btnPlayOrPause = findViewById(R.id.play_or_pause)
-        val btn_playingList = findViewById<ImageView>(R.id.playing_list)
-        btn_playAll.setOnClickListener(this)
-        btn_refresh.setOnClickListener(this)
+        val playingListBtn = findViewById<ImageView>(R.id.playing_list)
+        playAllBtn.setOnClickListener(this)
+        refreshBtn.setOnClickListener(this)
         playerToolView.setOnClickListener(this)
         btnPlayOrPause!!.setOnClickListener(this)
-        btn_playingList.setOnClickListener(this)
+        playingListBtn.setOnClickListener(this)
         localMusicList = ArrayList()
 
         //绑定播放服务
@@ -233,8 +233,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
         }
         localMusicList?.clear()
         for (s in list) {
-            val m =
-                Music(s.songUrl, s.title, s.artist, s.imgUrl)
+            val m = Music(s.songUrl, s.title, s.artist, s.imgUrl)
             localMusicList!!.add(m)
         }
 
@@ -266,13 +265,14 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             //列表项中删除按钮的点击事件
-            playingAdapter.setOnDeleteButtonListener(object :
-                PlayingMusicAdapter.OnDeleteButtonListener {
-                override fun onClick(i: Int) {
-                    serviceBinder!!.removeMusic(i)
-                    playingAdapter.notifyDataSetChanged()
+            playingAdapter.setOnDeleteButtonListener(
+                object : PlayingMusicAdapter.OnDeleteButtonListener {
+                    override fun onClick(i: Int) {
+                        serviceBinder!!.removeMusic(i)
+                        playingAdapter.notifyDataSetChanged()
+                    }
                 }
-            })
+            )
         } else {
             //播放列表没有曲目，显示没有音乐
             builder.setMessage("没有正在播放的音乐")

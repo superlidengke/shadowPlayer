@@ -150,7 +150,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                 fromUser: Boolean
             ) {
                 //拖动进度条时
-                nowTimeView?.setText(Utils.formatTime(progress.toLong()))
+                nowTimeView?.text = Utils.formatTime(progress.toLong())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -187,7 +187,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                 R.layout.playinglist_item,
                 playingList
             )
-            builder.setAdapter(playingAdapter) { dialog, which ->
+            builder.setAdapter(playingAdapter) { _, which ->
                 //监听列表项点击事件
                 serviceBinder!!.addPlayList(playingList[which]!!)
             }
