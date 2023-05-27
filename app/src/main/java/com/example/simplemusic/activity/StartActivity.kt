@@ -16,7 +16,8 @@ class StartActivity : AppCompatActivity() {
         // delay SPLASH_DISPLAY_LENGTH, then move to MainActivity
         val splashDisplayLength = 1000
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this@StartActivity, LocalMusicActivity::class.java)
+//            val intent = Intent(this@StartActivity, LocalMusicActivity::class.java)
+            val intent = Intent(this@StartActivity, DrawActivity::class.java)
             startActivity(intent)
             finish()
         }, splashDisplayLength.toLong())

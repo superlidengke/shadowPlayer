@@ -1,0 +1,148 @@
+package com.example.simplemusic.view
+
+import android.content.Context
+import android.content.res.Resources
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
+import android.util.Log
+import android.view.View
+import me.rosuh.libmpg123.MPG123
+import kotlin.math.abs
+
+
+class MyView(context: Context) : View(context) {
+    private lateinit var mPts: FloatArray
+
+    private val screenWidth: Float;
+    private val screenHeight: Float;
+    private val wavePanelHeight = 600f;
+
+    init {
+        val metrics = Resources.getSystem().displayMetrics
+        screenWidth = metrics.widthPixels.toFloat();
+        screenHeight = metrics.heightPixels.toFloat()
+
+        Log.d("MyView", "screen: $screenWidth,  $screenHeight")
+        buildPoints()
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        // TODO Auto-generated method stub
+        super.onDraw(canvas)
+        //使用Canvas绘图
+        //画布移动到(10,10)位置
+        canvas.translate(10f, 10f)
+        canvas.drawColor(Color.WHITE)
+        //创建红色画笔，使用单像素宽度，绘制直线
+        val paint = Paint()
+        paint.color = Color.RED
+        paint.strokeWidth = 3f
+        paint.isAntiAlias = true;//抗锯齿功能
+        canvas.drawLines(mPts, paint)
+        //创建蓝色画笔，宽度为3，绘制相关点
+        paint.color = Color.BLUE
+        paint.strokeWidth = 3f
+        canvas.drawPoints(mPts, paint)
+
+        paint.strokeWidth = 0f
+        canvas.drawLines(waveLines(), paint)
+
+        //创建Path, 并沿着path显示文字信息
+        val rect = RectF(20f, 500f, 890f, 1330f)
+        val path = Path()
+        path.addArc(rect, -180f, 180f)
+        paint.textSize = 68f
+        paint.color = Color.BLUE
+        canvas.drawTextOnPath(
+            "在自定义View中使用Canvas对象绘图实例",
+            path,
+            0f,
+            0f,
+            paint
+        )
+    }
+
+    /**
+     * Get the average abs volume in this frame
+     */
+    fun convertToWaveForm(array: ShortArray): Int {
+        return array.map { abs(it.toInt()) }.average().toInt()
+    }
+
+    fun getWaveData(): List<Int> {
+        val decoder = MPG123("/storage/emulated/0/Documents/audio1/311.mp3")
+        // let 0.01 second as one frame
+        val pointNumOfFrame = decoder.rate / 100
+        var frame = decoder.readFrame()
+        println("frame length: ${frame.size}")
+        val samplePoints = mutableListOf<Int>()
+        val bufferPoints = mutableListOf<Short>()
+        bufferPoints.addAll(frame.toList())
+        while (true) {
+            if (bufferPoints.size < pointNumOfFrame) {
+                frame = decoder.readFrame()
+                if (frame == null || frame.isEmpty()) {
+                    break
+                }
+                bufferPoints.addAll(frame.toList())
+            } else {
+                val subList = bufferPoints.subList(0, pointNumOfFrame)
+                samplePoints.add(convertToWaveForm(subList.toShortArray()))
+                subList.clear()
+            }
+        }
+        if (bufferPoints.size > 0) {
+            Log.d("MyView", "Last buffer size: ${bufferPoints.size}")
+            samplePoints.add(convertToWaveForm(bufferPoints.toShortArray()))
+        }
+        Log.d(
+            "MyView",
+            "Duration: ${decoder.duration}, 0.01 frame number: ${samplePoints.size}, Sample rate: ${decoder.rate},Channel: ${decoder.numChannels}"
+        )
+        return samplePoints
+    }
+
+    fun waveLines(): FloatArray {
+        val samplePoint = getWaveData()
+        val maxSample = samplePoint.max()
+        val waveHeights =
+            samplePoint.map { it * wavePanelHeight / maxSample }.toFloatArray()
+
+        val lineWidth = screenWidth / waveHeights.size
+        val yBase = screenHeight / 2
+
+        val linePoints = FloatArray(waveHeights.size * 4)
+        for (i in waveHeights.indices) {
+            linePoints[i * 4 + X] = i * lineWidth
+            linePoints[i * 4 + Y] = yBase - waveHeights[i]
+            linePoints[i * 4 + X + 2] = i * lineWidth
+            linePoints[i * 4 + Y + 2] = yBase
+        }
+        return linePoints
+    }
+
+    private fun buildPoints() {
+        //生成一系列点
+        val ptCount = (SEGS + 1) * 2
+        mPts = FloatArray(ptCount * 2)
+        var value = 0f
+        val delta = SIZE / SEGS
+        for (i in 0..SEGS) {
+            mPts[i * 4 + X] = SIZE - value
+            mPts[i * 4 + Y] = 0f
+            mPts[i * 4 + X + 2] = 0f
+            mPts[i * 4 + Y + 2] = value
+            value += delta
+        }
+    }
+
+    companion object {
+        private const val SIZE = 900f
+        private const val SEGS = 30
+        private const val X = 0
+        private const val Y = 1
+    }
+}

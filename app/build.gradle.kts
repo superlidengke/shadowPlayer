@@ -5,12 +5,12 @@ plugins {
 
 android {
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 
     compileSdk = 33
@@ -32,6 +32,13 @@ android {
         }
     }
     namespace = "com.example.simplemusic"
+    sourceSets {
+        getByName("debug") {
+            assets {
+                srcDirs("src\\debug\\assets", "src\\androidTest\\assets")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -51,6 +58,7 @@ dependencies {
     implementation("com.jaeger.statusbarutil:library:1.4.0")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.github.bumptech.glide:glide:4.9.0")
+    implementation("com.github.rosuH:MPG123-Android:0.1.2")
     annotationProcessor("com.github.bumptech.glide:compiler:4.9.0")
     implementation("org.litepal.android:core:2.0.0")
     implementation("me.rosuh:AndroidFilePicker:0.8.3")
