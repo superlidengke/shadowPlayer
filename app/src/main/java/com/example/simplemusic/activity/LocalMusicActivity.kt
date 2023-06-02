@@ -11,8 +11,12 @@ import android.os.IBinder
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
+import android.widget.ImageView
+import android.widget.ListView
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -112,6 +116,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
                     .setCustomRootPath(getSaveAudioPath()!!)
                     .forResult(FilePickerManager.REQUEST_CODE)
             }
+
             R.id.player -> {
                 val intent =
                     Intent(this@LocalMusicActivity, PlayerActivity::class.java)
@@ -121,6 +126,7 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
                     R.anim.bottom_silent
                 )
             }
+
             R.id.play_or_pause -> serviceBinder!!.playOrPause()
             R.id.playing_list -> showPlayList()
         }
@@ -248,10 +254,11 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
         val builder = AlertDialog.Builder(this)
 
         //设计对话框的显示标题
-        builder.setTitle("播放列表")
+        builder.setTitle("Play list")
 
         //获取播放列表
         val playingList = serviceBinder!!.playingList
+
         if (!playingList.isNullOrEmpty()) {
             //播放列表有曲目，显示所有音乐
             val playingAdapter = PlayingMusicAdapter(
@@ -259,11 +266,11 @@ class LocalMusicActivity : AppCompatActivity(), View.OnClickListener {
                 R.layout.playinglist_item,
                 playingList
             )
-            builder.setAdapter(playingAdapter) { dialog, which ->
-                //监听列表项点击事件
-                serviceBinder!!.addPlayList(playingList[which]!!)
-            }
 
+            builder.setAdapter(playingAdapter) { _, which ->
+                //监听列表项点击事件
+                serviceBinder!!.addPlayList(playingList[which])
+            }
             //列表项中删除按钮的点击事件
             playingAdapter.setOnDeleteButtonListener(
                 object : PlayingMusicAdapter.OnDeleteButtonListener {

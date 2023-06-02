@@ -123,7 +123,7 @@ class MusicService : Service() {
             get() = isPlayingInner
 
         // 获取播放列表
-        val playingList: List<Music?>?
+        val playingList: List<Music>
             get() = playingListInner
 
         // 注册监听器
@@ -248,8 +248,8 @@ class MusicService : Service() {
 
     val isPlayingInner: Boolean
         get() = player!!.isPlaying
-    val playingListInner: List<Music?>?
-        get() = playingMusicList
+    val playingListInner: List<Music>
+        get() = playingMusicList ?: mutableListOf<Music>()
 
     // 将要播放的音乐载入MediaPlayer，但是并不播放
     private fun prepareToPlay(item: Music) {

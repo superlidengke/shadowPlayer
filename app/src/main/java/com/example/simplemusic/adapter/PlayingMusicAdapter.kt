@@ -11,24 +11,23 @@ import com.example.simplemusic.R
 import com.example.simplemusic.bean.Music
 
 class PlayingMusicAdapter(
-    private val mContext: Context,
-    resId: Int,
-    private val mData: List<Music?>?
+    context: Context,
+    private val resId: Int,
+    private val mData: List<Music>
 ) : BaseAdapter() {
-    private val mInflater: LayoutInflater = LayoutInflater.from(mContext)
-    private val mResource: Int
+    private val mInflater: LayoutInflater
     private var monDeleteButtonListener: OnDeleteButtonListener? = null
 
     init {
-        mResource = resId
+        mInflater = LayoutInflater.from(context)
     }
 
     override fun getCount(): Int {
-        return mData?.size ?: 0
+        return mData.size
     }
 
     override fun getItem(position: Int): Any {
-        return mData?.get(position)!!
+        return mData[position]
     }
 
     override fun getItemId(position: Int): Long {
@@ -37,14 +36,14 @@ class PlayingMusicAdapter(
 
     override fun getView(
         position: Int,
-        convertView: View,
+        convertView: View?,
         parent: ViewGroup
     ): View {
-        val item = mData!![position]
+        val item = mData[position]
         val view: View
         val holder: ViewHolder
         if (convertView == null) {
-            view = mInflater.inflate(mResource, parent, false)
+            view = mInflater.inflate(resId, parent, false)
             holder = ViewHolder()
             holder.title = view.findViewById(R.id.playingmusic_title)
             holder.artist = view.findViewById(R.id.playingmusic_artist)
@@ -54,12 +53,10 @@ class PlayingMusicAdapter(
             view = convertView
             holder = view.tag as ViewHolder
         }
-        holder.title!!.text = item?.title
-        holder.artist!!.text = item?.artist
+        holder.title!!.text = item.title
+        holder.artist!!.text = item.artist
         holder.delete!!.setOnClickListener {
-            monDeleteButtonListener!!.onClick(
-                position
-            )
+            monDeleteButtonListener!!.onClick(position)
         }
         return view
     }
