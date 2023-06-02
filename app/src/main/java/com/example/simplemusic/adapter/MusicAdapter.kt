@@ -11,7 +11,7 @@ import com.example.simplemusic.R
 import com.example.simplemusic.bean.Music
 
 class MusicAdapter(
-    context: Context?,
+    context: Context,
     resId: Int,
     private val mData: List<Music>?
 ) : BaseAdapter() {
