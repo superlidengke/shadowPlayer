@@ -12,6 +12,9 @@ import android.view.View
 import me.rosuh.libmpg123.MPG123
 import kotlin.math.abs
 
+/**
+ * Duration: 26.46204, 0.01 frame number: 2641, Sample rate: 44100,Channel: 1
+ */
 
 class MyView(context: Context) : View(context) {
     private lateinit var mPts: FloatArray
@@ -48,7 +51,10 @@ class MyView(context: Context) : View(context) {
         canvas.drawPoints(mPts, paint)
 
         paint.strokeWidth = 0f
-        canvas.drawLines(waveLines(), paint)
+        val samplePoint = getWaveData()
+        canvas.drawLines(waveLines(samplePoint), paint)
+        // pause point
+        this.drawPause(canvas, samplePoint)
 
         //创建Path, 并沿着path显示文字信息
         val rect = RectF(20f, 500f, 890f, 1330f)
@@ -105,8 +111,8 @@ class MyView(context: Context) : View(context) {
         return samplePoints
     }
 
-    fun waveLines(): FloatArray {
-        val samplePoint = getWaveData()
+
+    fun waveLines(samplePoint: List<Int>): FloatArray {
         val maxSample = samplePoint.max()
         val waveHeights =
             samplePoint.map { it * wavePanelHeight / maxSample }.toFloatArray()
@@ -122,6 +128,37 @@ class MyView(context: Context) : View(context) {
             linePoints[i * 4 + Y + 2] = yBase
         }
         return linePoints
+    }
+
+    fun drawPause(canvas: Canvas, datas: List<Int>) {
+        val paint = Paint()
+        paint.style = Paint.Style.FILL
+        paint.color = Color.RED
+        val lineWidth = screenWidth / datas.size
+        getPausePoint(datas).forEach { posPair ->
+            //TODO change to start + 0.3 seconds
+            val x = (posPair.first + posPair.second) / 2f * lineWidth
+            val y = screenHeight / 2
+            canvas.drawCircle(x, y, 10f, paint);
+        }
+
+    }
+
+    fun getPausePoint(datas: List<Int>): List<Pair<Int, Int>> {
+        val slientV = 10
+        val pausePos: MutableList<Pair<Int, Int>> = mutableListOf()
+        var newStart = true
+        datas.forEachIndexed { idx, value ->
+            if (newStart && value <= slientV) {
+                pausePos.add(Pair(idx, idx))
+                newStart = false
+            } else if (!newStart && value <= slientV) {
+                pausePos[pausePos.lastIndex] = Pair(pausePos.last().first, idx)
+            } else if (!newStart && value > slientV) {
+                newStart = true
+            }
+        }
+        return pausePos.toList()
     }
 
     private fun buildPoints() {
