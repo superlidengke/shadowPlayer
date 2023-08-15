@@ -10,3 +10,11 @@ An audio player for shadow reading
 docker build -t showplayer -f .circleci/Dockerfile .
 docker run -it --entrypoint sh showplayer 
 ```
+
+## Issues
+
+1. When updated to API Level33 revision 2, the file dragged to the
+   /storage/emulated/0/Documents/
+   by DeviceExplorer can't be read by code. Though the file owner and permission
+   seemed no problem,
+   it will report permission deny. The file copied by test code is OK.

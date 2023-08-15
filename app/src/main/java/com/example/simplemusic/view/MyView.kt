@@ -10,6 +10,7 @@ import android.graphics.RectF
 import android.util.Log
 import android.view.View
 import me.rosuh.libmpg123.MPG123
+import java.io.File
 import kotlin.math.abs
 
 /**
@@ -22,13 +23,21 @@ class MyView(context: Context) : View(context) {
     private val screenWidth: Float;
     private val screenHeight: Float;
     private val wavePanelHeight = 600f;
+    private val logTag = "MyView"
+
+    // let 0.01 second as one frame
+    private val frameNumPerSecond = 100
+    private val timePerFrame = 1 / frameNumPerSecond
+    private val waveRowHeigth = 100
+    private val waveRowTime = 10 // seconds
+
 
     init {
         val metrics = Resources.getSystem().displayMetrics
         screenWidth = metrics.widthPixels.toFloat();
         screenHeight = metrics.heightPixels.toFloat()
 
-        Log.d("MyView", "screen: $screenWidth,  $screenHeight")
+        Log.d(logTag, "screen: $screenWidth,  $screenHeight")
         buildPoints()
     }
 
@@ -39,31 +48,30 @@ class MyView(context: Context) : View(context) {
         //画布移动到(10,10)位置
         canvas.translate(10f, 10f)
         canvas.drawColor(Color.WHITE)
-        //创建红色画笔，使用单像素宽度，绘制直线
+        //创建红色画笔，使用3单像素宽度，绘制直线
         val paint = Paint()
         paint.color = Color.RED
         paint.strokeWidth = 3f
         paint.isAntiAlias = true;//抗锯齿功能
         canvas.drawLines(mPts, paint)
-        //创建蓝色画笔，宽度为3，绘制相关点
+        //创建蓝色画笔，宽度为1(in hairline mode)，绘制相关点
         paint.color = Color.BLUE
-        paint.strokeWidth = 3f
-        canvas.drawPoints(mPts, paint)
-
         paint.strokeWidth = 0f
         val samplePoint = getWaveData()
-        canvas.drawLines(waveLines(samplePoint), paint)
+        if (samplePoint.isNotEmpty()) {
+            canvas.drawLines(waveLines(samplePoint), paint)
+        }
         // pause point
         this.drawPause(canvas, samplePoint)
 
         //创建Path, 并沿着path显示文字信息
-        val rect = RectF(20f, 500f, 890f, 1330f)
+        val rect = RectF(20f, 50f, 890f, 330f)
         val path = Path()
         path.addArc(rect, -180f, 180f)
         paint.textSize = 68f
         paint.color = Color.BLUE
         canvas.drawTextOnPath(
-            "在自定义View中使用Canvas对象绘图实例",
+            "Audio Waves",
             path,
             0f,
             0f,
@@ -79,9 +87,18 @@ class MyView(context: Context) : View(context) {
     }
 
     fun getWaveData(): List<Int> {
-        val decoder = MPG123("/storage/emulated/0/Documents/audio1/311.mp3")
-        // let 0.01 second as one frame
-        val pointNumOfFrame = decoder.rate / 100
+        val mp3Path = "/storage/emulated/0/Documents/audio1/320.mp3"
+        if (!File(mp3Path).exists()) {
+            Log.e(logTag, "$mp3Path doesn't exist")
+            return listOf()
+        }
+        if (!File(mp3Path).canRead()) {
+            Log.e(logTag, "$mp3Path is not readable")
+            return listOf()
+        }
+
+        val decoder = MPG123(mp3Path)
+        val pointNumOfFrame = decoder.rate / this.frameNumPerSecond
         var frame = decoder.readFrame()
         println("frame length: ${frame.size}")
         val samplePoints = mutableListOf<Int>()
@@ -106,13 +123,16 @@ class MyView(context: Context) : View(context) {
         }
         Log.d(
             "MyView",
-            "Duration: ${decoder.duration}, 0.01 frame number: ${samplePoints.size}, Sample rate: ${decoder.rate},Channel: ${decoder.numChannels}"
+            "Duration: ${decoder.duration}, frame number: ${samplePoints.size}, Sample rate: ${decoder.rate},Channel: ${decoder.numChannels}"
         )
         return samplePoints
     }
 
 
     fun waveLines(samplePoint: List<Int>): FloatArray {
+        if (samplePoint.isEmpty()) {
+            return FloatArray(0)
+        }
         val maxSample = samplePoint.max()
         val waveHeights =
             samplePoint.map { it * wavePanelHeight / maxSample }.toFloatArray()
@@ -177,8 +197,8 @@ class MyView(context: Context) : View(context) {
     }
 
     companion object {
-        private const val SIZE = 900f
-        private const val SEGS = 30
+        private const val SIZE = 200f
+        private const val SEGS = 10
         private const val X = 0
         private const val Y = 1
     }
