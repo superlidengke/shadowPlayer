@@ -28,8 +28,13 @@ class MyView(context: Context) : View(context) {
     // let 0.01 second as one frame
     private val frameNumPerSecond = 100
     private val timePerFrame = 1 / frameNumPerSecond
-    private val waveRowHeigth = 100
-    private val waveRowTime = 10 // seconds
+    private val rowHeight = 300
+    private val waveRowHeight = 190
+    private val textRowHeight = rowHeight - waveRowHeight
+    private val waveRowTime = 5 // seconds
+    private val marginTop = 200
+    private val marginLeft = 10
+    private val marginRight = 30
 
 
     init {
@@ -135,17 +140,27 @@ class MyView(context: Context) : View(context) {
         }
         val maxSample = samplePoint.max()
         val waveHeights =
-            samplePoint.map { it * wavePanelHeight / maxSample }.toFloatArray()
-
-        val lineWidth = screenWidth / waveHeights.size
-        val yBase = screenHeight / 2
+            samplePoint.map { it * this.waveRowHeight / maxSample }
+        val rowPointNum = this.waveRowTime * this.frameNumPerSecond
+        val lineWidth =
+            (screenWidth - this.marginLeft - this.marginRight) / rowPointNum
 
         val linePoints = FloatArray(waveHeights.size * 4)
+        Log.i(
+            logTag,
+            "rowPointNum: $rowPointNum, waveHeights.indices: ${waveHeights.size}"
+        )
         for (i in waveHeights.indices) {
-            linePoints[i * 4 + X] = i * lineWidth
-            linePoints[i * 4 + Y] = yBase - waveHeights[i]
-            linePoints[i * 4 + X + 2] = i * lineWidth
-            linePoints[i * 4 + Y + 2] = yBase
+            val rowOffset = i / rowPointNum + 1
+            val columnIdx = i % rowPointNum
+            val yBase =
+                rowOffset * this.rowHeight - this.textRowHeight + this.marginTop
+            var x = columnIdx * lineWidth + this.marginLeft
+
+            linePoints[i * 4 + X] = x
+            linePoints[i * 4 + Y] = (yBase - waveHeights[i]).toFloat()
+            linePoints[i * 4 + X + 2] = x
+            linePoints[i * 4 + Y + 2] = yBase.toFloat()
         }
         return linePoints
     }
