@@ -36,4 +36,11 @@ class ExampleUnitTest {
             list, mutableListOf(4, 5)
         )
     }
+
+    @Test
+    fun modFloat() {
+        Assert.assertTrue(0.0 == 0.5 % 0.5)
+        Assert.assertEquals(0.0, 1 % 0.5, 0.00000001)
+        Assert.assertEquals(0.0, 1.5 % 0.5, 0.00000001)
+    }
 }

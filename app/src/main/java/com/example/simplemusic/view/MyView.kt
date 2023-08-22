@@ -12,6 +12,7 @@ import android.view.View
 import me.rosuh.libmpg123.MPG123
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.ceil
 
 /**
  * Duration: 26.46204, 0.01 frame number: 2641, Sample rate: 44100,Channel: 1
@@ -19,7 +20,7 @@ import kotlin.math.abs
 
 class MyView(context: Context) : View(context) {
     private lateinit var mPts: FloatArray
-
+    private var audioDuration: Float = 0f
     private val screenWidth: Float;
     private val screenHeight: Float;
     private val wavePanelHeight = 600f;
@@ -29,7 +30,7 @@ class MyView(context: Context) : View(context) {
     private val frameNumPerSecond = 100
     private val timePerFrame = 1 / frameNumPerSecond
     private val rowHeight = 300
-    private val waveRowHeight = 190
+    private val waveRowHeight = 250
     private val textRowHeight = rowHeight - waveRowHeight
     private val waveRowTime = 5 // seconds
     private val marginTop = 200
@@ -66,6 +67,7 @@ class MyView(context: Context) : View(context) {
         if (samplePoint.isNotEmpty()) {
             canvas.drawLines(waveLines(samplePoint), paint)
         }
+        this.drawTime(canvas, this.audioDuration.toFloat())
         // pause point
         this.drawPause(canvas, samplePoint)
 
@@ -82,6 +84,20 @@ class MyView(context: Context) : View(context) {
             0f,
             paint
         )
+    }
+
+    fun timeToPos(time: Float): Pair<Float, Float> {
+        val rowPointNum = this.waveRowTime * this.frameNumPerSecond
+        val lineWidth =
+            (screenWidth - this.marginLeft - this.marginRight) / rowPointNum
+
+        val idx = (time * frameNumPerSecond).toInt()
+        val rowOffset = idx / rowPointNum + 1
+        val columnIdx = idx % rowPointNum
+        val y =
+            rowOffset * this.rowHeight + this.marginTop
+        var x = columnIdx * lineWidth + this.marginLeft
+        return Pair(x, y.toFloat())
     }
 
     /**
@@ -103,6 +119,7 @@ class MyView(context: Context) : View(context) {
         }
 
         val decoder = MPG123(mp3Path)
+        this.audioDuration = decoder.duration
         val pointNumOfFrame = decoder.rate / this.frameNumPerSecond
         var frame = decoder.readFrame()
         println("frame length: ${frame.size}")
@@ -163,6 +180,36 @@ class MyView(context: Context) : View(context) {
             linePoints[i * 4 + Y + 2] = yBase.toFloat()
         }
         return linePoints
+    }
+
+    fun drawTime(canvas: Canvas, duration: Float) {
+        val paint = Paint()
+        paint.style = Paint.Style.FILL
+        paint.color = Color.BLACK
+        paint.textSize = this.textRowHeight.toFloat()
+        paint.textAlign = Paint.Align.CENTER
+        (0..ceil(duration).toInt()).forEach {
+            val (x, y) = this.timeToPos(it.toFloat())
+            canvas.drawText(it.toString(), x - 3, y, paint)
+        }
+        paint.strokeWidth = 3f
+        (0..10 * ceil(duration).toInt()).forEach {
+            val (x, yRow) = this.timeToPos(it / 10f)
+            val y = yRow - this.textRowHeight
+            var lineHeight = 0f
+            val baseHeight = this.textRowHeight / 10f
+            if (it % 10 == 0) {
+                paint.color = Color.RED
+                lineHeight = baseHeight * 4
+            } else if (it % 5 == 0) {
+                paint.color = Color.RED
+                lineHeight = baseHeight * 4
+            } else {
+                paint.color = Color.BLACK
+                lineHeight = baseHeight * 2
+            }
+            canvas.drawLine(x, y, x, y + lineHeight, paint)
+        }
     }
 
     fun drawPause(canvas: Canvas, datas: List<Int>) {
