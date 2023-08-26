@@ -28,7 +28,7 @@ class MyView(context: Context) : View(context) {
 
     // let 0.01 second as one frame
     private val frameNumPerSecond = 100
-    private val timePerFrame = 1 / frameNumPerSecond
+    private val timePerFrame = 1f / frameNumPerSecond
     private val rowHeight = 300
     private val waveRowHeight = 250
     private val textRowHeight = rowHeight - waveRowHeight
@@ -165,7 +165,7 @@ class MyView(context: Context) : View(context) {
         val linePoints = FloatArray(waveHeights.size * 4)
         Log.i(
             logTag,
-            "rowPointNum: $rowPointNum, waveHeights.indices: ${waveHeights.size}"
+            "rowPointNum: $rowPointNum, waveHeights size: ${waveHeights.size}"
         )
         for (i in waveHeights.indices) {
             val rowOffset = i / rowPointNum + 1
@@ -215,18 +215,26 @@ class MyView(context: Context) : View(context) {
     fun drawPause(canvas: Canvas, datas: List<Int>) {
         val paint = Paint()
         paint.style = Paint.Style.FILL
-        paint.color = Color.RED
+
         val lineWidth = screenWidth / datas.size
-        getPausePoint(datas).forEach { posPair ->
+        getPausePoint(datas).forEach { pausePair ->
+            Log.d(logTag, "pause: $pausePair")
             //TODO change to start + 0.3 seconds
-            val x = (posPair.first + posPair.second) / 2f * lineWidth
-            val y = screenHeight / 2
-            canvas.drawCircle(x, y, 10f, paint);
+            val pauseStartTime = pausePair.first
+            val (x, y) = this.timeToPos(pauseStartTime)
+            paint.color = Color.RED
+            canvas.drawCircle(x, y, 10f, paint)
+            val (x2, y2) = this.timeToPos(pausePair.second)
+            paint.color = Color.YELLOW
+            canvas.drawCircle(x2, y2, 10f, paint);
         }
 
     }
 
-    fun getPausePoint(datas: List<Int>): List<Pair<Int, Int>> {
+    fun getPausePoint(
+        datas: List<Int>,
+        filterLessThan: Float = 0.15f
+    ): List<Pair<Float, Float>> {
         val slientV = 10
         val pausePos: MutableList<Pair<Int, Int>> = mutableListOf()
         var newStart = true
@@ -240,7 +248,12 @@ class MyView(context: Context) : View(context) {
                 newStart = true
             }
         }
-        return pausePos.toList()
+        return pausePos.map { it ->
+            Pair(
+                it.first * this.timePerFrame,
+                it.second * this.timePerFrame
+            )
+        }.filter { it.second - it.first > filterLessThan }
     }
 
     private fun buildPoints() {
