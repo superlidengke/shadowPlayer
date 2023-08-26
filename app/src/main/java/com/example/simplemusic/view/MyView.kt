@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import me.rosuh.libmpg123.MPG123
@@ -45,6 +46,11 @@ class MyView(context: Context) : View(context) {
 
         Log.d(logTag, "screen: $screenWidth,  $screenHeight")
         buildPoints()
+    }
+
+    constructor(
+        context: Context, attrs: AttributeSet
+    ) : this(context) {
     }
 
     override fun onDraw(canvas: Canvas) {
