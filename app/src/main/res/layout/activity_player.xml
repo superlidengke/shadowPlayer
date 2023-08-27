@@ -54,6 +54,14 @@
         android:layout_above="@id/music_time"
         android:layout_below="@id/toolbar"></include>
 
+    <com.example.simplemusic.view.MyView
+        android:id="@+id/wave_form"
+        android:layout_width="match_parent"
+        android:layout_height="476dp"
+        android:layout_above="@id/current_loop_count"
+        android:layout_marginBottom="15dp"
+        android:background="#f00" />
+
 
     <TextView
         android:id="@+id/current_loop_count"

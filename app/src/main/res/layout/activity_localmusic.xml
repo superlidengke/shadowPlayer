@@ -8,7 +8,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        android:background="#E3453A"/>
+        android:background="#E3453A" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -16,20 +16,20 @@
         android:layout_height="?attr/actionBarSize"
         android:background="#E3453A"
         android:theme="@style/Base.ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        >
-    </androidx.appcompat.widget.Toolbar>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"></androidx.appcompat.widget.Toolbar>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="45dp">
+
         <ImageView
             android:id="@+id/play_all"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_centerVertical="true"
             android:layout_marginStart="15dp"
-            android:background="@drawable/bofang"/>
+            android:background="@drawable/bofang" />
+
         <TextView
             android:id="@+id/play_all_title"
             android:layout_width="wrap_content"
@@ -37,8 +37,8 @@
             android:layout_centerVertical="true"
             android:gravity="center"
             android:layout_toEndOf="@id/play_all"
-            android:layout_marginStart="10dp"
-            />
+            android:layout_marginStart="10dp" />
+
         <ImageView
             android:id="@+id/refresh"
             android:layout_width="15dp"
@@ -46,32 +46,33 @@
             android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="15dp"
-            android:background="@drawable/shuaxin"/>
+            android:background="@drawable/shuaxin" />
 
     </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
-        android:background="#cec5c5"/>
+        android:background="#cec5c5" />
 
     <ListView
         android:id="@+id/music_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="10">
-    </ListView>
+        android:layout_weight="10" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
-        android:background="#cec5c5"/>
+        android:background="#cec5c5" />
+
     <RelativeLayout
         android:id="@+id/player"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginBottom="50dp"
-        >
+        android:layout_marginBottom="50dp">
+
         <ImageView
             android:id="@+id/playing_img"
             android:layout_width="40dp"
@@ -79,15 +80,15 @@
             android:src="@drawable/defult_music_img"
             android:layout_alignParentStart="true"
             android:layout_marginStart="10dp"
-            android:layout_centerVertical="true"
-            />
+            android:layout_centerVertical="true" />
+
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/playing_img"
-            android:layout_marginStart="10dp"
-            >
+            android:layout_marginStart="10dp">
+
             <TextView
                 android:id="@+id/playing_title"
                 android:layout_width="200dp"
@@ -99,16 +100,16 @@
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:focusable="true"
-                android:focusableInTouchMode="true"
-                />
+                android:focusableInTouchMode="true" />
+
             <TextView
                 android:id="@+id/playing_artist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp" />
         </RelativeLayout>
+
         <ImageView
             android:id="@+id/playing_list"
             android:layout_width="40dp"
@@ -116,7 +117,8 @@
             android:src="@drawable/liebiao"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"/>
+            android:layout_marginEnd="10dp" />
+
         <ImageView
             android:id="@+id/play_or_pause"
             android:layout_width="30dp"
@@ -124,7 +126,7 @@
             android:src="@drawable/bofang"
             android:layout_toStartOf="@id/playing_list"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"/>
+            android:layout_marginEnd="10dp" />
     </RelativeLayout>
 
 </LinearLayout>

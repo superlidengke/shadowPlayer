@@ -17,6 +17,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name="com.example.simplemusic.activity.LocalMusicActivity" />
         <activity android:name="com.example.simplemusic.activity.PlayerActivity" />
+        <activity android:name="com.example.simplemusic.activity.DrawActivity" />
 
         <service
             android:name="com.example.simplemusic.service.MusicService"
