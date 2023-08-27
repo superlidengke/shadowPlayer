@@ -25,6 +25,7 @@ import com.example.simplemusic.service.MusicService
 import com.example.simplemusic.service.MusicService.MusicServiceBinder
 import com.example.simplemusic.service.OnStateChangeListener
 import com.example.simplemusic.util.Utils
+import com.example.simplemusic.view.MyView
 import com.example.simplemusic.view.RotateAnimator
 
 class PlayerActivity : AppCompatActivity(), View.OnClickListener {
@@ -43,6 +44,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
     private var serviceBinder: MusicServiceBinder? = null
     private var playCountView: TextView? = null
     private var currentLoopCountView: TextView? = null
+    private var waveFormView: MyView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
@@ -79,6 +81,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                         ).show()
                         btnPlayMode!!.setImageResource(R.drawable.ic_singlerecycler)
                     }
+
                     Utils.TYPE_SINGLE -> {
                         serviceBinder!!.setPlayMode(Utils.TYPE_RANDOM)
                         Toast.makeText(
@@ -88,6 +91,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                         ).show()
                         btnPlayMode!!.setImageResource(R.drawable.ic_random)
                     }
+
                     else -> {
                         //                    case Utils.TYPE_RANDOM:
                         serviceBinder!!.setPlayMode(Utils.TYPE_ORDER)
@@ -100,14 +104,19 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 }
             }
+
             R.id.play_pre ->                 // 上一首
                 serviceBinder!!.playPre()
+
             R.id.play_next ->                 // 下一首
                 serviceBinder!!.playNext()
+
             R.id.play_or_pause ->                 // 播放或暂停
                 serviceBinder!!.playOrPause()
+
             R.id.playing_list ->                 // 播放列表
                 showPlayList()
+
             else -> {}
         }
     }
@@ -127,6 +136,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
         playCountView = findViewById(R.id.play_count)
         currentLoopCountView = findViewById(R.id.current_loop_count)
         currentLoopCountView?.text = Utils.currentLoopCount.toString()
+        waveFormView = findViewById(R.id.wave_form)
 
         val needleView = findViewById<ImageView>(R.id.ivNeedle)
 
@@ -227,35 +237,40 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                 if (item == null) {
                     //当前音乐为空, seekbar不可拖动
                     seekBar!!.isEnabled = false
-                } else if (serviceBinder!!.isPlaying) {
-                    //如果正在播放音乐, 更新信息
-                    musicTitleView!!.text = item.title
-                    musicArtistView!!.text = item.artist
-                    btnPlayOrPause!!.setImageResource(R.drawable.ic_pause)
-                    rotateAnimator!!.playAnimator()
-
-                    val resolver = contentResolver
-                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                    Glide.with(applicationContext)
-                        .load(img)
-                        .placeholder(R.drawable.defult_music_img)
-                        .error(R.drawable.defult_music_img)
-                        .into(musicImgView!!)
-
                 } else {
-                    //当前有可播放音乐但没有播放
-                    musicTitleView!!.text = item.title
-                    musicArtistView!!.text = item.artist
-                    btnPlayOrPause!!.setImageResource(R.drawable.ic_play)
+                    // redraw wave
+                    waveFormView?.soundPath = item.songUrl
+                    waveFormView?.invalidate()
+                    if (serviceBinder!!.isPlaying) {
+                        //如果正在播放音乐, 更新信息
+                        musicTitleView!!.text = item.title
+                        musicArtistView!!.text = item.artist
+                        btnPlayOrPause!!.setImageResource(R.drawable.ic_pause)
+                        rotateAnimator!!.playAnimator()
 
-                    val resolver = contentResolver
-                    val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
-                    Glide.with(applicationContext)
-                        .load(img)
-                        .placeholder(R.drawable.defult_music_img)
-                        .error(R.drawable.defult_music_img)
-                        .into(musicImgView!!)
+                        val resolver = contentResolver
+                        val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                        Glide.with(applicationContext)
+                            .load(img)
+                            .placeholder(R.drawable.defult_music_img)
+                            .error(R.drawable.defult_music_img)
+                            .into(musicImgView!!)
 
+                    } else {
+                        //当前有可播放音乐但没有播放
+                        musicTitleView!!.text = item.title
+                        musicArtistView!!.text = item.artist
+                        btnPlayOrPause!!.setImageResource(R.drawable.ic_play)
+
+                        val resolver = contentResolver
+                        val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)
+                        Glide.with(applicationContext)
+                            .load(img)
+                            .placeholder(R.drawable.defult_music_img)
+                            .error(R.drawable.defult_music_img)
+                            .into(musicImgView!!)
+
+                    }
                 }
 
                 // 获取当前播放模式
@@ -291,6 +306,9 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                 musicArtistView!!.text = item.artist
                 btnPlayOrPause!!.setImageResource(R.drawable.ic_pause)
                 rotateAnimator!!.playAnimator()
+
+                waveFormView?.soundPath = item.songUrl
+                waveFormView?.invalidate()
 
                 val resolver = contentResolver
                 val img = Utils.getLocalMusicBmp(resolver, item.imgUrl)

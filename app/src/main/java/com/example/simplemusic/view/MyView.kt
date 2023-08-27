@@ -19,13 +19,14 @@ import kotlin.math.ceil
  * Duration: 26.46204, 0.01 frame number: 2641, Sample rate: 44100,Channel: 1
  */
 
-class MyView(context: Context) : View(context) {
+class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private lateinit var mPts: FloatArray
     private var audioDuration: Float = 0f
     private val screenWidth: Float;
     private val screenHeight: Float;
     private val wavePanelHeight = 600f;
     private val logTag = "MyView"
+    var soundPath: String? = null
 
     // let 0.01 second as one frame
     private val frameNumPerSecond = 100
@@ -46,11 +47,6 @@ class MyView(context: Context) : View(context) {
 
         Log.d(logTag, "screen: $screenWidth,  $screenHeight")
         buildPoints()
-    }
-
-    constructor(
-        context: Context, attrs: AttributeSet
-    ) : this(context) {
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -114,7 +110,12 @@ class MyView(context: Context) : View(context) {
     }
 
     fun getWaveData(): List<Int> {
-        val mp3Path = "/storage/emulated/0/Documents/audio1/320.mp3"
+//        var mp3Path = "/storage/emulated/0/Documents/audio1/320.mp3"
+        if (soundPath == null) {
+            Log.e(logTag, "soundPath is null")
+            return listOf()
+        }
+        val mp3Path = soundPath!!
         if (!File(mp3Path).exists()) {
             Log.e(logTag, "$mp3Path doesn't exist")
             return listOf()

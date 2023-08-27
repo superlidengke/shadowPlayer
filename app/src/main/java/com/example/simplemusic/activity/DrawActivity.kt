@@ -8,6 +8,6 @@ class DrawActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(MyView(this))
+        setContentView(MyView(this, null))
     }
 }
