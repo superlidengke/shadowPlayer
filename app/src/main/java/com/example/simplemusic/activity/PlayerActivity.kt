@@ -8,15 +8,16 @@ import android.os.IBinder
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.widget.doAfterTextChanged
 import com.bumptech.glide.Glide
 import com.example.simplemusic.R
 import com.example.simplemusic.adapter.PlayingMusicAdapter
@@ -28,7 +29,9 @@ import com.example.simplemusic.util.Utils
 import com.example.simplemusic.view.MyView
 import com.example.simplemusic.view.RotateAnimator
 
-class PlayerActivity : AppCompatActivity(), View.OnClickListener {
+
+class PlayerActivity : AppCompatActivity(), View.OnClickListener,
+    AdapterView.OnItemSelectedListener {
     private var musicTitleView: TextView? = null
     private var musicArtistView: TextView? = null
     private var musicImgView: ImageView? = null
@@ -42,7 +45,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
     private var seekBar: SeekBar? = null
     private var rotateAnimator: RotateAnimator? = null
     private var serviceBinder: MusicServiceBinder? = null
-    private var playCountView: TextView? = null
+    private var playCountView: Spinner? = null
     private var currentLoopCountView: TextView? = null
     private var waveFormView: MyView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -168,11 +171,8 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
                 serviceBinder!!.seekTo(seekBar.progress)
             }
         })
-        playCountView?.doAfterTextChanged { text ->
-            if (text.toString().isNotEmpty()) {
-                Utils.totalLoopTimes = text.toString().toInt()
-            }
-        }
+        playCountView?.onItemSelectedListener = this
+        playCountView?.setSelection(2)
 
         //初始化动画
         rotateAnimator = RotateAnimator(this, musicImgView, needleView)
@@ -299,8 +299,9 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             override fun onPlay(item: Music) {
-                //变为播放状态时
-                currentLoopCountView!!.text = Utils.currentLoopCount.toString();
+                // count view starts from 1
+                currentLoopCountView!!.text =
+                    (1 + Utils.currentLoopCount).toString();
 
                 musicTitleView!!.text = item.title
                 musicArtistView!!.text = item.artist
@@ -341,5 +342,21 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener {
         super.finish()
         //界面退出时的动画
         overridePendingTransition(R.anim.bottom_silent, R.anim.bottom_out)
+    }
+
+    override fun onItemSelected(
+        parent: AdapterView<*>?,
+        view: View?,
+        position: Int,
+        id: Long
+    ) {
+        val item = parent?.getItemAtPosition(position)?.toString()
+        if (item != null) {
+            Utils.totalLoopTimes = item.toInt()
+        }
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("Not yet implemented")
     }
 }
