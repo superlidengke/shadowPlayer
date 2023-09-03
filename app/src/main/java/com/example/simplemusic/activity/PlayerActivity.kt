@@ -296,6 +296,9 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener,
                 totalTimeView!!.text = Utils.formatTime(duration)
                 nowTimeView!!.text = Utils.formatTime(played)
                 seekBar!!.progress = played.toInt()
+                waveFormView?.playingAt = played.toFloat() / 1000
+                Log.d("MyView", "drawPlayingAt ${played}")
+                waveFormView?.invalidate()
             }
 
             override fun onPlay(item: Music) {

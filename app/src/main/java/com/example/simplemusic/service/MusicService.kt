@@ -319,7 +319,10 @@ class MusicService : Service() {
                         l.onPlayProgressChange(played, duration)
                     }
                     //间隔一秒发送一次更新播放进度的消息
-                    sendEmptyMessageDelayed(66, 1000)
+                    if (player?.isPlaying == true) {
+                        sendEmptyMessageDelayed(66, 1000)
+                    }
+
                 }
             }
         }

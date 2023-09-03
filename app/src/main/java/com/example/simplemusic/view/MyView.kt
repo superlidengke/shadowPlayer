@@ -38,6 +38,7 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val marginTop = 200
     private val marginLeft = 10
     private val marginRight = 30
+    var playingAt = 0f
 
 
     init {
@@ -70,6 +71,7 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             canvas.drawLines(waveLines(samplePoint), paint)
         }
         this.drawTime(canvas, this.audioDuration.toFloat())
+        this.drawPlayingAt(canvas)
         // pause point
         this.drawPause(canvas, samplePoint)
 
@@ -88,6 +90,9 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         )
     }
 
+    /**
+     * return <left, row-bottom>
+     */
     fun timeToPos(time: Float): Pair<Float, Float> {
         val rowPointNum = this.waveRowTime * this.frameNumPerSecond
         val lineWidth =
@@ -219,14 +224,22 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         }
     }
 
+    fun drawPlayingAt(canvas: Canvas) {
+        val paint = Paint()
+        paint.style = Paint.Style.FILL
+        paint.color = Color.RED
+        paint.strokeWidth = 3f
+        val (x, y) = this.timeToPos(this.playingAt)
+        canvas.drawLine(x, y - this.rowHeight, x, y, paint)
+    }
+
     fun drawPause(canvas: Canvas, datas: List<Int>) {
         val paint = Paint()
         paint.style = Paint.Style.FILL
 
         val lineWidth = screenWidth / datas.size
         getPausePoint(datas).forEach { pausePair ->
-            Log.d(logTag, "pause: $pausePair")
-            //TODO change to start + 0.3 seconds
+            // Log.d(logTag, "pause: $pausePair")
             val pauseStartTime = pausePair.first
             val (x, y) = this.timeToPos(pauseStartTime)
             paint.color = Color.RED
