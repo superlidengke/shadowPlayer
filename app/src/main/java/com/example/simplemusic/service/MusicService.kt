@@ -6,13 +6,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
-import android.media.MediaPlayer
-import android.media.MediaPlayer.OnCompletionListener
 import android.net.Uri
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.example.simplemusic.bean.Music
 import com.example.simplemusic.db.PlayingMusic
 import com.example.simplemusic.util.Utils
@@ -20,7 +21,7 @@ import org.litepal.LitePal
 import java.io.IOException
 
 class MusicService : Service() {
-    var player: MediaPlayer? = null
+    var exoPlayer: ExoPlayer? = null
         private set
     private var playingMusicList: MutableList<Music>? = null
     private var listenrList: MutableList<OnStateChangeListener>? = null
@@ -35,12 +36,35 @@ class MusicService : Service() {
     var playModeInner = Utils.TYPE_SINGLE // 播放模式
         private set
     private val spf: SharedPreferences? = null
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
         initPlayList() //初始化播放列表
         listenrList = ArrayList() //初始化监听器列表
-        player = MediaPlayer() //初始化播放器
-        player!!.setOnCompletionListener(onCompletionListener) //设置播放完成的监听器
+        exoPlayer = ExoPlayer.Builder(this).build()
+        exoPlayer?.addListener(
+            object : Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (isPlaying) {
+                        // Active playback.
+                    } else {
+                        // Not playing because playback is paused, ended, suppressed, or the player
+                        // is buffering, stopped or failed. Check player.playWhenReady,
+                        // player.playbackState, player.playbackSuppressionReason and
+                        // player.playerError for details.
+                    }
+                }
+
+                override fun onPlayerStateChanged(
+                    playWhenReady: Boolean,
+                    state: Int
+                ) {
+                    if (state == ExoPlayer.STATE_ENDED) {
+                        doOnCompletion()
+                    }
+                }
+            })
         binder = MusicServiceBinder()
         audioManager =
             getSystemService(AUDIO_SERVICE) as AudioManager //获得音频管理服务
@@ -51,12 +75,25 @@ class MusicService : Service() {
         }
     }
 
+    fun doOnCompletion() {
+        Utils.count++ //累计听歌数量+1
+        Utils.currentLoopCount++
+        if (this.playModeInner == Utils.TYPE_SINGLE && Utils.currentLoopCount < Utils.totalLoopTimes) {
+            //单曲循环
+            this.isNeedReload = true
+            this.playInner()
+        } else {
+            Utils.currentLoopCount = 0
+            this.playNextInner()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        if (player!!.isPlaying) {
-            player!!.stop()
+        if (exoPlayer?.isPlaying == true) {
+            exoPlayer?.stop()
         }
-        player!!.release()
+        exoPlayer?.release()
         playingMusicList?.clear()
         listenrList?.clear()
         handler.removeMessages(66)
@@ -81,7 +118,7 @@ class MusicService : Service() {
         }
 
         fun playOrPause() {
-            if (player!!.isPlaying) {
+            if (exoPlayer?.isPlaying == true) {
                 pauseInner()
             } else {
                 playInner()
@@ -202,7 +239,7 @@ class MusicService : Service() {
     }
 
     fun pauseInner() {
-        player!!.pause()
+        exoPlayer?.pause()
         for (l in listenrList!!) {
             l.onPause()
         }
@@ -230,11 +267,12 @@ class MusicService : Service() {
         } else {
             //loop play list
             val currentIndex = playingMusicList!!.indexOf(currentMusicInner)
-            if (currentIndex < playingMusicList!!.size - 1) {
-                currentMusicInner = playingMusicList!![currentIndex + 1]
-            } else {
-                currentMusicInner = playingMusicList!![0]
-            }
+            currentMusicInner =
+                if (currentIndex < playingMusicList!!.size - 1) {
+                    playingMusicList!![currentIndex + 1]
+                } else {
+                    playingMusicList!![0]
+                }
         }
         isNeedReload = true
         Utils.currentLoopCount = 0
@@ -243,22 +281,25 @@ class MusicService : Service() {
 
     private fun seekToInner(pos: Int) {
         //将音乐拖动到指定的时间
-        player!!.seekTo(pos)
+        exoPlayer?.seekTo(pos.toLong())
     }
 
     val isPlayingInner: Boolean
-        get() = player!!.isPlaying
+        get() = exoPlayer!!.isPlaying
     val playingListInner: List<Music>
         get() = playingMusicList ?: mutableListOf<Music>()
 
     // 将要播放的音乐载入MediaPlayer，但是并不播放
     private fun prepareToPlay(item: Music) {
         try {
-            player!!.reset()
-            //设置播放音乐的地址
-            player!!.setDataSource(this@MusicService, Uri.parse(item.songUrl))
-            //准备播放音乐
-            player!!.prepare()
+            // Build the media items.
+            val firstItem = MediaItem.fromUri(Uri.parse(item.songUrl))
+            // Add the media items to be played.
+            exoPlayer?.setMediaItem(firstItem)
+
+            // Prepare the player.
+            exoPlayer?.prepare()
+
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -273,7 +314,7 @@ class MusicService : Service() {
             //需要重新加载音乐
             prepareToPlay(item)
         }
-        player!!.start()
+        exoPlayer?.play()
         for (l in listenrList!!) {
             l.onPlay(item)
         }
@@ -302,8 +343,6 @@ class MusicService : Service() {
     }
 
     //当前歌曲播放完成的监听器
-    private val onCompletionListener: OnCompletionListener =
-        MyOnCompletionListener(this)
     private val audioFocusListener: OnAudioFocusChangeListener =
         MyOnAudioFocusChangeListener(this)
 
@@ -312,16 +351,12 @@ class MusicService : Service() {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 66 -> {
-                    //通知监听者当前的播放进度
-                    val played = player!!.currentPosition.toLong()
-                    val duration = player!!.duration.toLong()
-                    for (l in listenrList!!) {
-                        l.onPlayProgressChange(played, duration)
+                    val played = exoPlayer!!.currentPosition
+                    val duration = exoPlayer!!.duration
+                    listenrList?.forEach {
+                        it.onPlayProgressChange(played, duration)
                     }
-                    //间隔一秒发送一次更新播放进度的消息
-                    if (player?.isPlaying == true) {
-                        sendEmptyMessageDelayed(66, 1000)
-                    }
+                    sendEmptyMessageDelayed(66, 50)
 
                 }
             }

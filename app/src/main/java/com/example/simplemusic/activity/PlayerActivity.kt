@@ -292,13 +292,14 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener,
     private val listenr: OnStateChangeListener =
         object : OnStateChangeListener {
             override fun onPlayProgressChange(played: Long, duration: Long) {
-                seekBar!!.max = duration.toInt()
-                totalTimeView!!.text = Utils.formatTime(duration)
-                nowTimeView!!.text = Utils.formatTime(played)
-                seekBar!!.progress = played.toInt()
-                waveFormView?.playingAt = played.toFloat() / 1000
-                Log.d("MyView", "drawPlayingAt ${played}")
-                waveFormView?.invalidate()
+                if (serviceBinder?.isPlaying == true) {
+                    seekBar!!.max = duration.toInt()
+                    totalTimeView!!.text = Utils.formatTime(duration)
+                    nowTimeView!!.text = Utils.formatTime(played)
+                    seekBar!!.progress = played.toInt()
+                    waveFormView?.playingAt = played.toFloat() / 1000
+                    waveFormView?.invalidate()
+                }
             }
 
             override fun onPlay(item: Music) {

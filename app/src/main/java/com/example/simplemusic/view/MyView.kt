@@ -55,7 +55,8 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         super.onDraw(canvas)
         //使用Canvas绘图
         //画布移动到(10,10)位置
-        canvas.translate(10f, 10f)
+//        canvas.translate(10f, 10f)
+        tranlateCanvas(canvas)
         canvas.drawColor(Color.WHITE)
         //创建红色画笔，使用3单像素宽度，绘制直线
         val paint = Paint()
@@ -88,6 +89,13 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             0f,
             paint
         )
+    }
+
+    fun tranlateCanvas(canvas: Canvas) {
+        val currentRow = this.playingAt.toInt() / this.waveRowTime
+        if (currentRow > 1) {
+            canvas.translate(10f, -this.rowHeight * currentRow.toFloat())
+        }
     }
 
     /**
