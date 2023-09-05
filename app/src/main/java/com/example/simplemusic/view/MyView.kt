@@ -40,6 +40,8 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val marginRight = 30
     var playingAt = 0f
 
+    private var waveDataCache: Pair<String, List<Int>> = Pair("", listOf())
+
 
     init {
         val metrics = Resources.getSystem().displayMetrics
@@ -124,11 +126,15 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     fun getWaveData(): List<Int> {
 //        var mp3Path = "/storage/emulated/0/Documents/audio1/320.mp3"
-        if (soundPath == null) {
-            Log.e(logTag, "soundPath is null")
+        if (soundPath.isNullOrEmpty()) {
+            Log.e(logTag, "soundPath is NullOrEmpty")
             return listOf()
         }
         val mp3Path = soundPath!!
+        if (waveDataCache.first == mp3Path) {
+            Log.d("Temp log", "Use wave cache for $mp3Path")
+            return waveDataCache.second
+        }
         if (!File(mp3Path).exists()) {
             Log.e(logTag, "$mp3Path doesn't exist")
             return listOf()
@@ -167,6 +173,7 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             "MyView",
             "Duration: ${decoder.duration}, frame number: ${samplePoints.size}, Sample rate: ${decoder.rate},Channel: ${decoder.numChannels}"
         )
+        this.waveDataCache = Pair(mp3Path, samplePoints)
         return samplePoints
     }
 
