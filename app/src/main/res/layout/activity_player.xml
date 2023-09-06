@@ -62,24 +62,11 @@
         android:layout_marginBottom="15dp"
         android:background="#f00" />
 
-
-    <TextView
-        android:id="@+id/current_loop_count"
+    <com.example.simplemusic.view.PlayCounter
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/play_count"
-        android:layout_above="@+id/music_time"
-        android:layout_marginBottom="30dp"
-        android:text="1" />
+        android:layout_above="@+id/music_time" />
 
-    <Spinner
-        android:id="@+id/play_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/music_time"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="30dp"
-        android:entries="@array/total_loop_counts" />
 
     <!--使用相对布局设置唱片在播放页面的中的位置-->
     <RelativeLayout
