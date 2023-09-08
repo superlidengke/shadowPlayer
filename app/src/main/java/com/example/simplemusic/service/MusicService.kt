@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.Message
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -56,11 +57,9 @@ class MusicService : Service() {
                     }
                 }
 
-                override fun onPlayerStateChanged(
-                    playWhenReady: Boolean,
-                    state: Int
-                ) {
-                    if (state == ExoPlayer.STATE_ENDED) {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    super.onPlaybackStateChanged(playbackState)
+                    if (playbackState == ExoPlayer.STATE_ENDED) {
                         doOnCompletion()
                     }
                 }
@@ -347,7 +346,7 @@ class MusicService : Service() {
         MyOnAudioFocusChangeListener(this)
 
     @SuppressLint("HandlerLeak")
-    private val handler: Handler = object : Handler() {
+    private val handler: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 66 -> {

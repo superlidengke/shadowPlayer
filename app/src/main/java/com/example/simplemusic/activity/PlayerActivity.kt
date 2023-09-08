@@ -199,7 +199,7 @@ class PlayerActivity : AppCompatActivity(), View.OnClickListener,
             )
             builder.setAdapter(playingAdapter) { _, which ->
                 //监听列表项点击事件
-                serviceBinder!!.addPlayList(playingList[which]!!)
+                serviceBinder!!.addPlayList(playingList[which])
             }
 
             //列表项中删除按钮的点击事件
