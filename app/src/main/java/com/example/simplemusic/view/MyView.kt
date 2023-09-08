@@ -38,6 +38,9 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val marginTop = 200
     private val marginLeft = 10
     private val marginRight = 30
+    var playingAt = 0f
+
+    private var waveDataCache: Pair<String, List<Int>> = Pair("", listOf())
 
 
     init {
@@ -54,7 +57,8 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         super.onDraw(canvas)
         //使用Canvas绘图
         //画布移动到(10,10)位置
-        canvas.translate(10f, 10f)
+//        canvas.translate(10f, 10f)
+        tranlateCanvas(canvas)
         canvas.drawColor(Color.WHITE)
         //创建红色画笔，使用3单像素宽度，绘制直线
         val paint = Paint()
@@ -70,6 +74,7 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             canvas.drawLines(waveLines(samplePoint), paint)
         }
         this.drawTime(canvas, this.audioDuration.toFloat())
+        this.drawPlayingAt(canvas)
         // pause point
         this.drawPause(canvas, samplePoint)
 
@@ -88,6 +93,16 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         )
     }
 
+    fun tranlateCanvas(canvas: Canvas) {
+        val currentRow = this.playingAt.toInt() / this.waveRowTime
+        if (currentRow > 1) {
+            canvas.translate(10f, -this.rowHeight * currentRow.toFloat())
+        }
+    }
+
+    /**
+     * return <left, row-bottom>
+     */
     fun timeToPos(time: Float): Pair<Float, Float> {
         val rowPointNum = this.waveRowTime * this.frameNumPerSecond
         val lineWidth =
@@ -111,11 +126,15 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     fun getWaveData(): List<Int> {
 //        var mp3Path = "/storage/emulated/0/Documents/audio1/320.mp3"
-        if (soundPath == null) {
-            Log.e(logTag, "soundPath is null")
+        if (soundPath.isNullOrEmpty()) {
+            Log.e(logTag, "soundPath is NullOrEmpty")
             return listOf()
         }
         val mp3Path = soundPath!!
+        if (waveDataCache.first == mp3Path) {
+            Log.d("Temp log", "Use wave cache for $mp3Path")
+            return waveDataCache.second
+        }
         if (!File(mp3Path).exists()) {
             Log.e(logTag, "$mp3Path doesn't exist")
             return listOf()
@@ -154,6 +173,7 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             "MyView",
             "Duration: ${decoder.duration}, frame number: ${samplePoints.size}, Sample rate: ${decoder.rate},Channel: ${decoder.numChannels}"
         )
+        this.waveDataCache = Pair(mp3Path, samplePoints)
         return samplePoints
     }
 
@@ -219,14 +239,22 @@ class MyView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         }
     }
 
+    fun drawPlayingAt(canvas: Canvas) {
+        val paint = Paint()
+        paint.style = Paint.Style.FILL
+        paint.color = Color.RED
+        paint.strokeWidth = 3f
+        val (x, y) = this.timeToPos(this.playingAt)
+        canvas.drawLine(x, y - this.rowHeight, x, y, paint)
+    }
+
     fun drawPause(canvas: Canvas, datas: List<Int>) {
         val paint = Paint()
         paint.style = Paint.Style.FILL
 
         val lineWidth = screenWidth / datas.size
         getPausePoint(datas).forEach { pausePair ->
-            Log.d(logTag, "pause: $pausePair")
-            //TODO change to start + 0.3 seconds
+            // Log.d(logTag, "pause: $pausePair")
             val pauseStartTime = pausePair.first
             val (x, y) = this.timeToPos(pauseStartTime)
             paint.color = Color.RED
