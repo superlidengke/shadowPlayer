@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.SharedPreferences
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.net.Uri
@@ -12,6 +14,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -20,6 +23,7 @@ import com.example.simplemusic.db.PlayingMusic
 import com.example.simplemusic.util.Utils
 import org.litepal.LitePal
 import java.io.IOException
+
 
 class MusicService : Service() {
     var exoPlayer: ExoPlayer? = null
@@ -37,6 +41,24 @@ class MusicService : Service() {
     var playModeInner = Utils.TYPE_SINGLE // 播放模式
         private set
     private val spf: SharedPreferences? = null
+
+    private val audioFocusListener: OnAudioFocusChangeListener =
+        MyOnAudioFocusChangeListener(this)
+
+    private val playbackAttributes: AudioAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_GAME)
+        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+        .build()
+
+    // set the playback attributes for the focus requester
+
+    // set the playback attributes for the focus requester
+    private var focusRequest: AudioFocusRequest =
+        AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(playbackAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(audioFocusListener)
+            .build()
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
@@ -96,7 +118,7 @@ class MusicService : Service() {
         playingMusicList?.clear()
         listenrList?.clear()
         handler.removeMessages(66)
-        audioManager!!.abandonAudioFocus(audioFocusListener) //注销音频管理服务
+        audioManager!!.abandonAudioFocusRequest(focusRequest) //注销音频管理服务
     }
 
     //定义binder与活动通信
@@ -218,11 +240,12 @@ class MusicService : Service() {
     fun playInner() {
 
         //获取音频焦点
-        audioManager!!.requestAudioFocus(
-            audioFocusListener,
-            AudioManager.STREAM_MUSIC,
-            AudioManager.AUDIOFOCUS_GAIN
-        )
+        val audioFocusRequestResult =
+            audioManager!!.requestAudioFocus(focusRequest)
+        if (audioFocusRequestResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+            Log.e("SystemError", "can't get audio focus successfully")
+            return
+        }
 
         //如果之前没有选定要播放的音乐，就选列表中的第一首音乐开始播放
         if (currentMusicInner == null && playingMusicList!!.size > 0) {
@@ -339,11 +362,12 @@ class MusicService : Service() {
             currentMusicInner = playingMusicList?.get(0)
             isNeedReload = true
         }
+
+
     }
 
     //当前歌曲播放完成的监听器
-    private val audioFocusListener: OnAudioFocusChangeListener =
-        MyOnAudioFocusChangeListener(this)
+
 
     @SuppressLint("HandlerLeak")
     private val handler: Handler = object : Handler(Looper.getMainLooper()) {
