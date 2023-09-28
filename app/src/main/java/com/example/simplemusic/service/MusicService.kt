@@ -1,8 +1,11 @@
 package com.example.simplemusic.service
 
+/**
+ * https://developer.android.com/media/implement/playback-app#playing_media_in_the_background
+ *https://developer.android.com/media/implement/surfaces/mobile#kotlin
+ *https://developer.android.com/guide/topics/media/session/mediasession#adding-custom
+ */
 import android.annotation.SuppressLint
-import android.app.Service
-import android.content.Intent
 import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -11,13 +14,14 @@ import android.media.AudioManager.OnAudioFocusChangeListener
 import android.net.Uri
 import android.os.Binder
 import android.os.Handler
-import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
 import com.example.simplemusic.bean.Music
 import com.example.simplemusic.db.PlayingMusic
 import com.example.simplemusic.util.Utils
@@ -25,9 +29,10 @@ import org.litepal.LitePal
 import java.io.IOException
 
 
-class MusicService : Service() {
+class MusicService : MediaSessionService() {
     var exoPlayer: ExoPlayer? = null
         private set
+    private var mediaSession: MediaSession? = null
     private var playingMusicList: MutableList<Music>? = null
     private var listenrList: MutableList<OnStateChangeListener>? = null
     private var binder: MusicServiceBinder? = null
@@ -66,6 +71,7 @@ class MusicService : Service() {
         initPlayList() //初始化播放列表
         listenrList = ArrayList() //初始化监听器列表
         exoPlayer = ExoPlayer.Builder(this).build()
+        mediaSession = MediaSession.Builder(this, exoPlayer!!).build()
         exoPlayer?.addListener(
             object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -120,6 +126,10 @@ class MusicService : Service() {
         handler.removeMessages(66)
         audioManager!!.abandonAudioFocusRequest(focusRequest) //注销音频管理服务
     }
+
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
+        this.mediaSession
+
 
     //定义binder与活动通信
     inner class MusicServiceBinder : Binder() {
@@ -386,8 +396,5 @@ class MusicService : Service() {
         }
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        //当组件bindService()之后，将这个Binder返回给组件使用
-        return binder
-    } //焦点控制
+
 }
