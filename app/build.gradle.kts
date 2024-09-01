@@ -60,7 +60,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.9.0")
     implementation("com.github.rosuH:MPG123-Android:0.1.2")
     annotationProcessor("com.github.bumptech.glide:compiler:4.9.0")
-    implementation("org.litepal.android:core:2.0.0")
+    implementation("org.litepal.guolindev:core:3.2.3")
     implementation("me.rosuh:AndroidFilePicker:0.8.3")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -71,6 +71,6 @@ dependencies {
 }
 
 repositories {
-    maven { url = uri("https://jitpack.io") }
-    jcenter()
+    maven(url = "https://jitpack.io")
+    maven(url = "https://maven.aliyun.com/repository/public")
 }
