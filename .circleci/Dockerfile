@@ -1,5 +1,5 @@
 # run test
-FROM cimg/android:2023.02
+FROM cimg/android:2024.08.1
 LABEL description="An image with gradle"
 # make work directory
 WORKDIR /workspace/shadow-player
